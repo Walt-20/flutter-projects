@@ -16,10 +16,20 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
   // defualt values
   String? selectedMortgageType;
   String? selectedMortgageTerm;
+  double loanAmount = 0.0;
   double monthlyMortgage = 0.0;
   double interestRate = 0.0;
+  double downpaymentAmount = 0.0;
   TextEditingController loanAmountController = TextEditingController();
   TextEditingController downpaymentAmountController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    loanAmountController.text = '0.0';
+    downpaymentAmountController.text = '0.0';
+  }
+
   final _dropdownFormKey = GlobalKey<FormState>();
   List<DropdownMenuItem<String>> get mortgageTypeItems {
     List<DropdownMenuItem<String>> menuItems = [
@@ -101,6 +111,16 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                     controller: loanAmountController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Loan Amount'),
+                    onTap: () {
+                      if (loanAmountController.text == '0.0') {
+                        loanAmountController.clear();
+                      }
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        loanAmount = double.tryParse(value) ?? 0.0;
+                      });
+                    },
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -111,6 +131,16 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                     keyboardType: TextInputType.number,
                     decoration:
                         const InputDecoration(labelText: 'Downpayment Amount'),
+                    onTap: () {
+                      if (downpaymentAmountController.text == '0.0') {
+                        downpaymentAmountController.clear();
+                      }
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        downpaymentAmount = double.tryParse(value) ?? 0.0;
+                      });
+                    },
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -170,10 +200,6 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                     onPressed: () async {
-                      double loanAmount =
-                          double.parse(loanAmountController.text);
-                      double downPayment =
-                          double.parse(downpaymentAmountController.text);
                       int loanTermInMonths =
                           selectedMortgageTerm == '15 Year' ? 15 * 12 : 30 * 12;
 
@@ -182,7 +208,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                           selectedMortgageType, selectedMortgageTerm);
                       debugPrint(
                           'loan amount is $loanAmount\nloan term in months is $loanTermInMonths\ninterest rate is $interestRate');
-                      monthlyMortgage = calculateMortgage(downPayment,
+                      monthlyMortgage = calculateMortgage(downpaymentAmount,
                           loanAmount, interestRate, loanTermInMonths);
                       SharedData().setMonthlyMortgage(monthlyMortgage);
                       debugPrint('Monthly Payment: $monthlyMortgage');
