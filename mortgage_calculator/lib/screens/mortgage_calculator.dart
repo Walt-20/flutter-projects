@@ -51,6 +51,29 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
     return numerator / denominator;
   }
 
+  Future<double> fetchInterestRate(String? loanType, String? loanTerm) async {
+    String seriesId = 'MORTGAGE30US';
+    if (loanTerm == '15 Year') {
+      seriesId = 'MORTGAGE15US';
+    }
+
+    final url =
+        'https://api.stlouisfed.org/fred/series/observations?series_id=$seriesId&api_key=$API_KEY&file_type=json';
+    debugPrint('the url is $url');
+    try {
+      final reponse = await http.get(Uri.parse(url));
+      if (reponse.statusCode == 200) {
+        final data = json.decode(reponse.body);
+        final latestObservation = data['observations'][0];
+        return double.parse(latestObservation['value']);
+      } else {
+        throw Exception('Failed to get data');
+      }
+    } catch (e) {
+      throw Exception('Failed to get data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,11 +150,17 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       double loanAmount =
                           double.parse(loanAmountController.text);
                       int loanTermInMonths =
                           selectedMortgageTerm == '15 Year' ? 15 * 12 : 30 * 12;
+
+                      // fetch interest rate
+                      interestRate = await fetchInterestRate(
+                          selectedMortgageType, selectedMortgageTerm);
+                      debugPrint(
+                          'loan amount is $loanAmount\nloan term in months is $loanTermInMonths\ninterest rate is $interestRate');
                       monthlyMortgage = calculateMortgage(
                           loanAmount, interestRate, loanTermInMonths);
                       debugPrint('Monthly Payment: $monthlyMortgage');
