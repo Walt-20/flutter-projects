@@ -1,9 +1,10 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import '/auth/secrets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '/auth/secrets.dart';
+import 'package:mortgage_calculator/shared_data.dart';
 
 class MortgageCalculator extends StatefulWidget {
   const MortgageCalculator({super.key});
@@ -183,6 +184,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                           'loan amount is $loanAmount\nloan term in months is $loanTermInMonths\ninterest rate is $interestRate');
                       monthlyMortgage = calculateMortgage(downPayment,
                           loanAmount, interestRate, loanTermInMonths);
+                      SharedData().setMonthlyMortgage(monthlyMortgage);
                       debugPrint('Monthly Payment: $monthlyMortgage');
                       setState(() {});
                     },
