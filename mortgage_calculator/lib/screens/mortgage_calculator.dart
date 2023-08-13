@@ -12,13 +12,13 @@ class MortgageCalculator extends StatefulWidget {
 }
 
 class MortgageCalculatorState extends State<MortgageCalculator> {
-  double rate30 = 0.0;
-  double rate15 = 0.0;
-  String? selectedMortgageType; // defualt value
+  // defualt values
+  String? selectedMortgageType;
   String? selectedMortgageTerm;
   double monthlyMortgage = 0.0;
-  double interestRate = 6.665;
+  double interestRate = 0.0;
   TextEditingController loanAmountController = TextEditingController();
+  TextEditingController downpaymentAmountController = TextEditingController();
   final _dropdownFormKey = GlobalKey<FormState>();
   List<DropdownMenuItem<String>> get mortgageTypeItems {
     List<DropdownMenuItem<String>> menuItems = [
@@ -41,10 +41,11 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
     return menuItems;
   }
 
-  double calculateMortgage(
-      double loanAmout, double interestRate, int loanTermInMonths) {
+  double calculateMortgage(double downPayment, double loanAmout,
+      double interestRate, int loanTermInMonths) {
     double monthlyInterestRate = interestRate / 12 / 100;
-    double numerator = loanAmout *
+    double newLoanAmount = loanAmout - downPayment;
+    double numerator = newLoanAmount *
         monthlyInterestRate *
         pow(1 + monthlyInterestRate, loanTermInMonths);
     double denominator = pow(1 + monthlyInterestRate, loanTermInMonths) - 1;
@@ -53,8 +54,15 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
 
   Future<double> fetchInterestRate(String? loanType, String? loanTerm) async {
     String seriesId = 'MORTGAGE30US';
+    // loan term
     if (loanTerm == '15 Year') {
       seriesId = 'MORTGAGE15US';
+    }
+
+    if (loanType == 'VA' && loanTerm == '30 Year') {
+      seriesId = 'OBMMIVA30YF';
+    } else if (loanType == 'FHA' && loanTerm == '30 Year') {
+      seriesId = 'OBMMIFHA30YF';
     }
 
     final url =
@@ -92,6 +100,16 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                     controller: loanAmountController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Loan Amount'),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: TextFormField(
+                    controller: downpaymentAmountController,
+                    keyboardType: TextInputType.number,
+                    decoration:
+                        const InputDecoration(labelText: 'Downpayment Amount'),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -153,6 +171,8 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                     onPressed: () async {
                       double loanAmount =
                           double.parse(loanAmountController.text);
+                      double downPayment =
+                          double.parse(downpaymentAmountController.text);
                       int loanTermInMonths =
                           selectedMortgageTerm == '15 Year' ? 15 * 12 : 30 * 12;
 
@@ -161,7 +181,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                           selectedMortgageType, selectedMortgageTerm);
                       debugPrint(
                           'loan amount is $loanAmount\nloan term in months is $loanTermInMonths\ninterest rate is $interestRate');
-                      monthlyMortgage = calculateMortgage(
+                      monthlyMortgage = calculateMortgage(downPayment,
                           loanAmount, interestRate, loanTermInMonths);
                       debugPrint('Monthly Payment: $monthlyMortgage');
                       setState(() {});
