@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../shared_data.dart';
 
@@ -17,6 +18,7 @@ class GrossYearlyIncomeState extends State<GrossYearlyIncome> {
 
   @override
   Widget build(BuildContext context) {
+    final sharedData = Provider.of<SharedData>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gross Yearly Income'),
@@ -86,7 +88,8 @@ class GrossYearlyIncomeState extends State<GrossYearlyIncome> {
               ),
             ElevatedButton(
                 onPressed: () {
-                  SharedData().setGrossIncome(yearlyIncome);
+                  sharedData.setGrossIncome(yearlyIncome);
+                  debugPrint('yearly income is $yearlyIncome');
                 },
                 child: const Text('Calculate'))
           ],

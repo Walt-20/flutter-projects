@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import '/auth/secrets.dart';
 import 'package:mortgage_calculator/shared_data.dart';
+import 'package:provider/provider.dart';
 
 class MortgageCalculator extends StatefulWidget {
   const MortgageCalculator({super.key});
@@ -83,7 +84,8 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
       final reponse = await http.get(Uri.parse(url));
       if (reponse.statusCode == 200) {
         final data = json.decode(reponse.body);
-        final latestObservation = data['observations'][0];
+        final observations = data['observations'] as List<dynamic>;
+        final latestObservation = observations.last;
         return double.parse(latestObservation['value']);
       } else {
         throw Exception('Failed to get data');
@@ -95,6 +97,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
 
   @override
   Widget build(BuildContext context) {
+    final sharedData = Provider.of<SharedData>(context, listen: false);
     return Scaffold(
       appBar: AppBar(title: const Text('Mortgage Calculator')),
       body: Center(
@@ -210,7 +213,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                           'loan amount is $loanAmount\nloan term in months is $loanTermInMonths\ninterest rate is $interestRate');
                       monthlyMortgage = calculateMortgage(downpaymentAmount,
                           loanAmount, interestRate, loanTermInMonths);
-                      SharedData().setMonthlyMortgage(monthlyMortgage);
+                      sharedData.setMonthlyMortgage(monthlyMortgage);
                       debugPrint('Monthly Payment: $monthlyMortgage');
                       setState(() {});
                     },

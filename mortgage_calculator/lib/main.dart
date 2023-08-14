@@ -38,10 +38,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // access to shared data
-    double monthlyMortgage = context.watch<SharedData>().monthlyMortgage;
-    double grossIncome = context.watch<SharedData>().grossIncome;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home Screen'),
@@ -90,13 +86,23 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Monthly Mortgage: \$${monthlyMortgage.toStringAsFixed(2)}'),
-          Text('Gross Income: \$${grossIncome.toStringAsFixed(2)}'),
-        ],
-      )),
+        child: Consumer<SharedData>(
+          builder: (context, sharedData, child) {
+            double monthlyMortgage = sharedData.monthlyMortgage;
+            double grossIncome = sharedData.grossIncome;
+            debugPrint("getting monthly mortgage $monthlyMortgage");
+            debugPrint("getting gross income $grossIncome");
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                    'Monthly Mortgage: \$${monthlyMortgage.toStringAsFixed(2)}'),
+                Text('Gross Income: \$${grossIncome.toStringAsFixed(2)}'),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 }

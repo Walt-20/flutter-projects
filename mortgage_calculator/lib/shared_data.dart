@@ -9,11 +9,13 @@ class SharedData extends ChangeNotifier {
 
   void setMonthlyMortgage(double value) {
     _monthlyMortgage = value;
+    debugPrint("setting monthly mortgage $_monthlyMortgage");
     notifyListeners();
   }
 
   void setGrossIncome(double value) {
     _grossIncome = value;
+    debugPrint("setting gross income $_grossIncome");
     notifyListeners();
   }
 }
