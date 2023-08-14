@@ -40,6 +40,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   # allows for sharing of data over multiple screens
   provider: ^5.0.0
+  # charts
+  fl_chart: ^0.40.0
 
 dev_dependencies:
   flutter_test:

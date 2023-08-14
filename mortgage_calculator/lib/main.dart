@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import 'screens/mortgage_calculator.dart';
 import 'screens/gross_yearly_income.dart';
@@ -90,11 +91,42 @@ class HomeScreen extends StatelessWidget {
           builder: (context, sharedData, child) {
             double monthlyMortgage = sharedData.monthlyMortgage;
             double grossIncome = sharedData.grossIncome;
+            double monthlyGrossIncome = grossIncome / 12;
+            double debtToIncomeRatio =
+                (monthlyMortgage / monthlyGrossIncome) * 100;
+            double remainingPercentage = 100 - debtToIncomeRatio;
             debugPrint("getting monthly mortgage $monthlyMortgage");
-            debugPrint("getting gross income $grossIncome");
+            debugPrint("getting gross income $monthlyGrossIncome");
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                AspectRatio(
+                  aspectRatio: 1.5,
+                  child: PieChart(
+                    PieChartData(
+                      sections: [
+                        PieChartSectionData(
+                          value: debtToIncomeRatio,
+                          color: Colors.blue,
+                          title: '${debtToIncomeRatio.toStringAsFixed(2)}%',
+                          radius: 50,
+                          titleStyle: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        PieChartSectionData(
+                          value: remainingPercentage,
+                          color: Colors.grey,
+                          title: '${remainingPercentage.toStringAsFixed(2)}%',
+                        ),
+                      ],
+                      sectionsSpace: 0,
+                      centerSpaceRadius: 30,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Text(
                     'Monthly Mortgage: \$${monthlyMortgage.toStringAsFixed(2)}'),
                 Text('Gross Income: \$${grossIncome.toStringAsFixed(2)}'),
