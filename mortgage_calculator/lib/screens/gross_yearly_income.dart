@@ -13,6 +13,7 @@ class GrossYearlyIncome extends StatefulWidget {
 class GrossYearlyIncomeState extends State<GrossYearlyIncome> {
   String? jobType;
   double yearlyIncome = 0.0;
+  double monthlyGrossIncome = 0.0;
   double? hoursWorkedPerWeek;
   double? hourlyPay;
 
@@ -89,9 +90,16 @@ class GrossYearlyIncomeState extends State<GrossYearlyIncome> {
             ElevatedButton(
                 onPressed: () {
                   sharedData.setGrossIncome(yearlyIncome);
-                  debugPrint('yearly income is $yearlyIncome');
+                  debugPrint('yearly gross income is $yearlyIncome');
+                  monthlyGrossIncome = yearlyIncome / 12;
+                  debugPrint(monthlyGrossIncome.toString());
                 },
-                child: const Text('Calculate'))
+                child: const Text('Calculate')),
+            const SizedBox(height: 20),
+            Text(
+              'Gross Monthly Income \$${monthlyGrossIncome.toStringAsFixed(2)}',
+              style: const TextStyle(fontSize: 18),
+            ),
           ],
         ),
       ),

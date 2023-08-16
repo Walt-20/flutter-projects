@@ -45,7 +45,7 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             ListTile(
-              title: const Text('Gross Yearly Income'),
+              title: const Text('Gross Monthly Income'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
                 Navigator.pushNamed(context, '/gross_yearly_income');
@@ -59,6 +59,14 @@ class HomeScreen extends StatelessWidget {
           builder: (context, sharedData, child) {
             double monthlyMortgage = sharedData.monthlyMortgage;
             double grossIncome = sharedData.grossIncome;
+            double monthlyGrossIncome = grossIncome / 12;
+            double debtToIncome = 0.0;
+
+            if (monthlyMortgage != 0.0 && monthlyGrossIncome != 0.0) {
+              debtToIncome = monthlyMortgage /
+                  monthlyGrossIncome *
+                  100; // Calculate debt-to-income ratio
+            }
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -68,7 +76,12 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Gross Monthly Income: \$${grossIncome.toStringAsFixed(2)}',
+                  'Gross Monthly Income: \$${monthlyGrossIncome.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Debt to Income: ${debtToIncome.toStringAsFixed(2)}%',
                   style: const TextStyle(fontSize: 18),
                 ),
               ],
