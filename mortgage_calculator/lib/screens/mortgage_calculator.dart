@@ -17,18 +17,18 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
   // defualt values
   String? selectedMortgageType;
   String? selectedMortgageTerm;
-  double loanAmount = 0.0;
+  int loanAmount = 0;
   double monthlyMortgage = 0.0;
   double interestRate = 0.0;
-  double downpaymentAmount = 0.0;
+  int downpaymentAmount = 0;
   TextEditingController loanAmountController = TextEditingController();
   TextEditingController downpaymentAmountController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    loanAmountController.text = '0.0';
-    downpaymentAmountController.text = '0.0';
+    loanAmountController.text = '';
+    downpaymentAmountController.text = '';
   }
 
   final _dropdownFormKey = GlobalKey<FormState>();
@@ -53,10 +53,10 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
     return menuItems;
   }
 
-  double calculateMortgage(double downPayment, double loanAmout,
+  double calculateMortgage(int downPayment, int loanAmout,
       double interestRate, int loanTermInMonths) {
     double monthlyInterestRate = interestRate / 12 / 100;
-    double newLoanAmount = loanAmout - downPayment;
+    int newLoanAmount = loanAmout - downPayment;
     double numerator = newLoanAmount *
         monthlyInterestRate *
         pow(1 + monthlyInterestRate, loanTermInMonths);
@@ -82,7 +82,9 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
     debugPrint('the url is $url');
     try {
       final reponse = await http.get(Uri.parse(url));
+      debugPrint("awaiting response ${reponse.statusCode}");
       if (reponse.statusCode == 200) {
+        debugPrint("Got ${reponse.statusCode}");
         final data = json.decode(reponse.body);
         final observations = data['observations'] as List<dynamic>;
         final latestObservation = observations.last;
@@ -115,13 +117,13 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Loan Amount'),
                     onTap: () {
-                      if (loanAmountController.text == '0.0') {
+                      if (loanAmountController.text == '0') {
                         loanAmountController.clear();
                       }
                     },
                     onChanged: (value) {
                       setState(() {
-                        loanAmount = double.tryParse(value) ?? 0.0;
+                        loanAmount = int.tryParse(value) ?? 0;
                       });
                     },
                   ),
@@ -135,13 +137,13 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                     decoration:
                         const InputDecoration(labelText: 'Downpayment Amount'),
                     onTap: () {
-                      if (downpaymentAmountController.text == '0.0') {
+                      if (downpaymentAmountController.text == '0') {
                         downpaymentAmountController.clear();
                       }
                     },
                     onChanged: (value) {
                       setState(() {
-                        downpaymentAmount = double.tryParse(value) ?? 0.0;
+                        downpaymentAmount = int.tryParse(value) ?? 0;
                       });
                     },
                   ),
@@ -165,7 +167,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                         fillColor: Colors.blueAccent,
                       ),
                       validator: (value) =>
-                          value == null ? "Select Mortgage Type" : null,
+                          value == null ? "Mortgage Type" : null,
                       dropdownColor: Colors.blueAccent,
                       value: selectedMortgageType,
                       onChanged: (String? newValue) {
@@ -189,7 +191,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                       fillColor: Colors.blueAccent,
                     ),
                     validator: (value) =>
-                        value == null ? 'Select Loan Term' : null,
+                        value == null ? 'Loan Term' : null,
                     dropdownColor: Colors.blueAccent,
                     value: selectedMortgageTerm,
                     onChanged: (String? newValue) {
