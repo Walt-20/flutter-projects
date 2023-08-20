@@ -1,8 +1,10 @@
 import 'dart:math';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../auth/secrets.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../shared_data.dart'; // Import the gross yearly income widget
 
@@ -26,13 +28,21 @@ class HomeScreenState extends State<HomeScreen> {
   double interestRate = 0.0;
   int downpaymentAmount = 0;
   double percentage = 0.0;
-  TextEditingController loanAmountController = TextEditingController();
+  final _loanController = TextEditingController();
+  final _downpaymentController = TextEditingController();
+  final _yearlyIncome = TextEditingController();
+  static const _locale = 'en';
+  String _formatNumber(String s) =>
+      NumberFormat.decimalPattern(_locale).format(int.parse(s));
+  String get _currency =>
+      NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
   TextEditingController downpaymentAmountController = TextEditingController();
+  final currencyFormatter =
+      NumberFormat.currency(locale: 'en-US', symbol: '\$');
 
   @override
   void initState() {
     super.initState();
-    loanAmountController.text = '';
     downpaymentAmountController.text = '';
   }
 
@@ -69,8 +79,8 @@ class HomeScreenState extends State<HomeScreen> {
       double denominator = pow(1 + monthlyInterestRate, loanTermInMonths) - 1;
       return numerator / denominator;
     } else {
-      double newLoanAmount = (loanAmount * (percentage / 100));
-      double numerator = newLoanAmount *
+      double percentageDownPayment = (loanAmount * (percentage / 100));
+      double numerator = (loanAmout - percentageDownPayment) *
           monthlyInterestRate *
           pow(1 + monthlyInterestRate, loanTermInMonths);
       double denominator = pow(1 + monthlyInterestRate, loanTermInMonths) - 1;
@@ -123,7 +133,7 @@ class HomeScreenState extends State<HomeScreen> {
           key: _dropdownFormKey,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Financial Information
+            // ---------------- Financial Information Section ---------------- //
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Consumer<SharedData>(
@@ -161,6 +171,8 @@ class HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
+            // ---------------- End Financial Information Section ---------------- //
+
             // ---------------- Mortgage Section ---------------- //
             const Padding(
               padding: EdgeInsets.all(16.0),
@@ -178,17 +190,17 @@ class HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: TextFormField(
-                controller: loanAmountController,
+                controller: _loanController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Loan Amount'),
-                onTap: () {
-                  if (loanAmountController.text == '0') {
-                    loanAmountController.clear();
-                  }
-                },
                 onChanged: (value) {
+                  value = _formatNumber(value.replaceAll(',', ''));
+                  _loanController.value = TextEditingValue(
+                    text: value,
+                    selection: TextSelection.collapsed(offset: value.length),
+                  );
                   setState(() {
-                    loanAmount = int.tryParse(value) ?? 0;
+                    loanAmount = int.parse(value.replaceAll(',', ''));
                   });
                 },
               ),
@@ -201,18 +213,20 @@ class HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     flex: 3,
                     child: TextFormField(
-                      controller: downpaymentAmountController,
+                      controller: _downpaymentController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                           labelText: 'Downpayment Amount'),
-                      onTap: () {
-                        if (downpaymentAmountController.text == '0') {
-                          downpaymentAmountController.clear();
-                        }
-                      },
                       onChanged: (value) {
+                        value = _formatNumber(value.replaceAll(',', ''));
+                        _downpaymentController.value = TextEditingValue(
+                          text: value,
+                          selection:
+                              TextSelection.collapsed(offset: value.length),
+                        );
                         setState(() {
-                          downpaymentAmount = int.tryParse(value) ?? 0;
+                          downpaymentAmount =
+                              int.parse(value.replaceAll(',', ''));
                         });
                       },
                     ),
@@ -285,29 +299,6 @@ class HomeScreenState extends State<HomeScreen> {
                 items: mortgageTermItems,
               ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                int loanTermInMonths =
-                    selectedMortgageTerm == '15 Year' ? 15 * 12 : 30 * 12;
-
-                // fetch interest rate
-                interestRate = await fetchInterestRate(
-                    selectedMortgageType, selectedMortgageTerm);
-                debugPrint(
-                    'loan amount is $loanAmount\nloan term in months is $loanTermInMonths\ninterest rate is $interestRate\ndownpayment is $downpaymentAmount\npercentage is $percentage');
-                monthlyMortgage = calculateMortgage(
-                    percentage,
-                    downpaymentAmount,
-                    loanAmount,
-                    interestRate,
-                    loanTermInMonths);
-                sharedData.setMonthlyMortgage(monthlyMortgage);
-                debugPrint('Monthly Payment: $monthlyMortgage');
-                setState(() {});
-              },
-              child: const Text('Calculate'),
-            ),
             // ---------------- End Mortgage Section ---------------- //
 
             // ---------------- Income Section ---------------- //
@@ -338,12 +329,20 @@ class HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 16.0),
                   if (jobType == 'Salaried')
                     TextFormField(
+                      controller: _yearlyIncome,
                       keyboardType: TextInputType.number,
-                      decoration:
-                          const InputDecoration(labelText: 'Yearly Income'),
+                      decoration: const InputDecoration(
+                          labelText: 'Downpayment Amount'),
                       onChanged: (value) {
+                        value = _formatNumber(value.replaceAll(',', ''));
+                        _yearlyIncome.value = TextEditingValue(
+                          text: value,
+                          selection:
+                              TextSelection.collapsed(offset: value.length),
+                        );
                         setState(() {
-                          yearlyIncome = double.parse(value);
+                          yearlyIncome =
+                              double.parse(value.replaceAll(',', ''));
                         });
                       },
                     ),
@@ -379,7 +378,21 @@ class HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      int loanTermInMonths =
+                          selectedMortgageTerm == '15 Year' ? 15 * 12 : 30 * 12;
+
+                      // fetch interest rate
+                      interestRate = await fetchInterestRate(
+                          selectedMortgageType, selectedMortgageTerm);
+                      monthlyMortgage = calculateMortgage(
+                          percentage,
+                          downpaymentAmount,
+                          loanAmount,
+                          interestRate,
+                          loanTermInMonths);
+                      sharedData.setMonthlyMortgage(monthlyMortgage);
+                      debugPrint('Monthly Payment: $monthlyMortgage');
                       sharedData.setGrossIncome(yearlyIncome);
                       debugPrint('yearly gross income is $yearlyIncome');
                       monthlyGrossIncome = yearlyIncome / 12;
@@ -391,6 +404,7 @@ class HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+            // ---------------- End Income Section ---------------- //
           ],
         ),
       ),
