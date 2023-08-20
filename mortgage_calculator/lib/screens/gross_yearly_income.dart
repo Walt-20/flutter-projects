@@ -93,6 +93,7 @@ class GrossYearlyIncomeState extends State<GrossYearlyIncome> {
                   debugPrint('yearly gross income is $yearlyIncome');
                   monthlyGrossIncome = yearlyIncome / 12;
                   debugPrint(monthlyGrossIncome.toString());
+                  setState(() {});
                 },
                 child: const Text('Calculate')),
             const SizedBox(height: 20),

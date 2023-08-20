@@ -21,6 +21,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
   double monthlyMortgage = 0.0;
   double interestRate = 0.0;
   int downpaymentAmount = 0;
+  double percentage = 0.0;
   TextEditingController loanAmountController = TextEditingController();
   TextEditingController downpaymentAmountController = TextEditingController();
 
@@ -53,15 +54,24 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
     return menuItems;
   }
 
-  double calculateMortgage(int downPayment, int loanAmout,
+  double calculateMortgage(double percentage, int downPayment, int loanAmout,
       double interestRate, int loanTermInMonths) {
     double monthlyInterestRate = interestRate / 12 / 100;
-    int newLoanAmount = loanAmout - downPayment;
-    double numerator = newLoanAmount *
-        monthlyInterestRate *
-        pow(1 + monthlyInterestRate, loanTermInMonths);
-    double denominator = pow(1 + monthlyInterestRate, loanTermInMonths) - 1;
-    return numerator / denominator;
+    if (percentage == 0.0) {
+      int newLoanAmountWithoutPercentage = loanAmout - downPayment;
+      double numerator = newLoanAmountWithoutPercentage *
+          monthlyInterestRate *
+          pow(1 + monthlyInterestRate, loanTermInMonths);
+      double denominator = pow(1 + monthlyInterestRate, loanTermInMonths) - 1;
+      return numerator / denominator;
+    } else {
+      double newLoanAmount = (loanAmount * (percentage / 100));
+      double numerator = newLoanAmount *
+          monthlyInterestRate *
+          pow(1 + monthlyInterestRate, loanTermInMonths);
+      double denominator = pow(1 + monthlyInterestRate, loanTermInMonths) - 1;
+      return numerator / denominator;
+    }
   }
 
   Future<double> fetchInterestRate(String? loanType, String? loanTerm) async {
@@ -131,21 +141,42 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: TextFormField(
-                    controller: downpaymentAmountController,
-                    keyboardType: TextInputType.number,
-                    decoration:
-                        const InputDecoration(labelText: 'Downpayment Amount'),
-                    onTap: () {
-                      if (downpaymentAmountController.text == '0') {
-                        downpaymentAmountController.clear();
-                      }
-                    },
-                    onChanged: (value) {
-                      setState(() {
-                        downpaymentAmount = int.tryParse(value) ?? 0;
-                      });
-                    },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: TextFormField(
+                          controller: downpaymentAmountController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                              labelText: 'Downpayment Amount'),
+                          onTap: () {
+                            if (downpaymentAmountController.text == '0') {
+                              downpaymentAmountController.clear();
+                            }
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              downpaymentAmount = int.tryParse(value) ?? 0;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 1,
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: '%'),
+                          onChanged: (value) {
+                            setState(() {
+                              // Assuming you have a variable for the percentage, update it here
+                              percentage = double.tryParse(value) ?? 0.0;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -190,8 +221,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                       filled: true,
                       fillColor: Colors.blueAccent,
                     ),
-                    validator: (value) =>
-                        value == null ? 'Loan Term' : null,
+                    validator: (value) => value == null ? 'Loan Term' : null,
                     dropdownColor: Colors.blueAccent,
                     value: selectedMortgageTerm,
                     onChanged: (String? newValue) {
@@ -212,9 +242,13 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                       interestRate = await fetchInterestRate(
                           selectedMortgageType, selectedMortgageTerm);
                       debugPrint(
-                          'loan amount is $loanAmount\nloan term in months is $loanTermInMonths\ninterest rate is $interestRate');
-                      monthlyMortgage = calculateMortgage(downpaymentAmount,
-                          loanAmount, interestRate, loanTermInMonths);
+                          'loan amount is $loanAmount\nloan term in months is $loanTermInMonths\ninterest rate is $interestRate\ndownpayment is $downpaymentAmount\npercentage is $percentage');
+                      monthlyMortgage = calculateMortgage(
+                          percentage,
+                          downpaymentAmount,
+                          loanAmount,
+                          interestRate,
+                          loanTermInMonths);
                       sharedData.setMonthlyMortgage(monthlyMortgage);
                       debugPrint('Monthly Payment: $monthlyMortgage');
                       setState(() {});
@@ -222,7 +256,7 @@ class MortgageCalculatorState extends State<MortgageCalculator> {
                     child: const Text('Calculate')),
                 const SizedBox(height: 20),
                 Text(
-                  'Monthly Payment \$${monthlyMortgage.toStringAsFixed(2)}',
+                  'Monthly Mortgage Payment \$${monthlyMortgage.toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 18),
                 ),
               ],
