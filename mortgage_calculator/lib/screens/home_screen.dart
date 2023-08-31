@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../auth/secrets.dart';
@@ -34,8 +33,8 @@ class HomeScreenState extends State<HomeScreen> {
   static const _locale = 'en';
   String _formatNumber(String s) =>
       NumberFormat.decimalPattern(_locale).format(int.parse(s));
-  String get _currency =>
-      NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
+  // String get _currency =>
+  //     NumberFormat.compactSimpleCurrency(locale: _locale).currencySymbol;
   TextEditingController downpaymentAmountController = TextEditingController();
   final currencyFormatter =
       NumberFormat.currency(locale: 'en-US', symbol: '\$');
@@ -201,6 +200,7 @@ class HomeScreenState extends State<HomeScreen> {
                   );
                   setState(() {
                     loanAmount = int.parse(value.replaceAll(',', ''));
+                    debugPrint("the loan amount is $loanAmount");
                   });
                 },
               ),
@@ -228,6 +228,7 @@ class HomeScreenState extends State<HomeScreen> {
                           downpaymentAmount =
                               int.parse(value.replaceAll(',', ''));
                         });
+                        debugPrint("the down payment is $downpaymentAmount");
                       },
                     ),
                   ),
@@ -242,6 +243,7 @@ class HomeScreenState extends State<HomeScreen> {
                           // Assuming you have a variable for the percentage, update it here
                           percentage = double.tryParse(value) ?? 0.0;
                         });
+                        debugPrint("percentage is $percentage");
                       },
                     ),
                   ),
@@ -273,6 +275,7 @@ class HomeScreenState extends State<HomeScreen> {
                     setState(() {
                       selectedMortgageType = newValue!;
                     });
+                    debugPrint("the mortage type $selectedMortgageType");
                   },
                   items: mortgageTypeItems),
             ),
@@ -295,6 +298,8 @@ class HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     selectedMortgageTerm = newValue!;
                   });
+                  debugPrint(
+                      "The selected mortgage term $selectedMortgageTerm");
                 },
                 items: mortgageTermItems,
               ),
@@ -332,7 +337,7 @@ class HomeScreenState extends State<HomeScreen> {
                       controller: _yearlyIncome,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                          labelText: 'Downpayment Amount'),
+                          labelText: 'Yearly Gross Income'),
                       onChanged: (value) {
                         value = _formatNumber(value.replaceAll(',', ''));
                         _yearlyIncome.value = TextEditingValue(
@@ -344,6 +349,7 @@ class HomeScreenState extends State<HomeScreen> {
                           yearlyIncome =
                               double.parse(value.replaceAll(',', ''));
                         });
+                        debugPrint("the yearly income is $yearlyIncome");
                       },
                     ),
                   if (jobType == 'Hourly')
