@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'screens/home_screen.dart';
-import 'screens/mortgage_calculator.dart';
-import 'screens/gross_yearly_income.dart';
 import 'shared_data.dart';
 
 void main() {
@@ -26,10 +24,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomeScreen(),
-      routes: {
-        '/mortgage_calculator': (context) => const MortgageCalculator(),
-        '/gross_yearly_income': (context) => const GrossYearlyIncome(),
-      },
     );
   }
 }
