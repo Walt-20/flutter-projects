@@ -8,3 +8,6 @@ A personal project that uses the [FRED API](https://fred.stlouisfed.org/docs/api
 ## Upon user input and "Calculate" button being pressed
 
 ![Mortgage Calculator filled](https://i.imgur.com/VG4rixY.png)
+
+## Future Implementations
+In the future I would like to add a "debts" section where a user can input debts and get a more accurate estimate of their DTI
