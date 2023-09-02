@@ -1,16 +1,5 @@
 # mortgage_calculator
 
-A new Flutter project.
+A personal project that uses the [FRED API](https://fred.stlouisfed.org/docs/api/fred/) to pull in avaerage mortgage rates for different types of mortgages, both term and type. Takes input of user gross salary, desired loan payment, and/or downpayment (percentage or cash). Computates the average monthly mortgage, monthly gross income, and debt to income ration
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![Mortgage Calculator starting up]()
