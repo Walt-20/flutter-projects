@@ -125,7 +125,7 @@ class HomeScreenState extends State<HomeScreen> {
     final sharedData = Provider.of<SharedData>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home Screen'),
+        title: const Text('Mortgage Calculator'),
       ),
       body: SingleChildScrollView(
         child: Column(
