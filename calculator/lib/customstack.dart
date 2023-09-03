@@ -1,4 +1,4 @@
-class ShuntingYard<T> {
+class CustomStack<T> {
   final _output = <T>[];
 
   void push(T value) => _output.add(value);

@@ -1,6 +1,6 @@
 import 'package:calculator/buttons.dart';
 import 'package:flutter/material.dart';
-import 'shuntingyard.dart';
+import 'customstack.dart';
 
 void main() => runApp(const MyApp());
 
@@ -121,6 +121,7 @@ class _HomePageState extends State<HomePage> {
                         setState(() {
                           userEquation += buttons[index];
                         });
+                        debugPrint(userEquation);
                       },
                       buttonText: buttons[index],
                       color: isOperator(buttons[index])
@@ -144,6 +145,10 @@ class _HomePageState extends State<HomePage> {
     return ['+', '-', 'x', '/', '%'].contains(x);
   }
 
+  bool isDigit(String s) {
+    return double.tryParse(s) != null;
+  }
+
   int precedence(String x) {
     if (x == '+' || x == '-') {
       return 1;
@@ -154,46 +159,58 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  bool hasLeftAssociativity(String x) {
-    if (['+', '-', 'x', '/', '%'].contains(x)) {
-      return true;
-    }
-    return false;
-  }
-
   // Shunting Yard algorthim to solve equations
   void reversePolishNotation() {
     if (userEquation.isEmpty) {
       debugPrint("is empty");
     }
 
-    //Stack
-    final ShuntingYard<String> stack = ShuntingYard<String>();
+    // Stack
+    final CustomStack<String> stack = CustomStack<String>();
     String output = "";
+    String numberBuffer = "";
 
     for (var i = 0; i < userEquation.length; i++) {
       String token = userEquation[i];
       if (!isOperator(token)) {
-        output += token;
-      } else if (token == '(') {
-        stack.push(token);
-      } else if (token == ')') {
-        while (!stack.isEmpty && stack.peek() != '(') {
-          output += stack.pop() + " ";
-        }
-        stack.pop(); // Pop the '('
+        // Accumulate digits and decimal points in numberBuffer
+        numberBuffer += token;
       } else {
-        while (!stack.isEmpty &&
-            precedence(token) <= precedence(stack.peek().toString()) &&
-            hasLeftAssociativity(token)) {
-          output += stack.pop() + " ";
+        // If numberBuffer is not empty, add it to the output
+        if (numberBuffer.isNotEmpty) {
+          output += numberBuffer + " ";
+          numberBuffer = ""; // Reset the numberBuffer
         }
-        stack.push(token);
+
+        if (token == '(') {
+          stack.push(token);
+        } else if (token == ')') {
+          while (!stack.isEmpty && stack.peek() != '(') {
+            output += stack.pop() + " ";
+          }
+          stack.pop(); // Pop the '('
+        } else {
+          while (!stack.isEmpty &&
+              precedence(token) <= precedence(stack.peek().toString()) &&
+              isOperator(token)) {
+            output += stack.pop() + " ";
+          }
+          debugPrint("else statement $output");
+          debugPrint("token is $token");
+          stack.push(token);
+        }
       }
     }
+
+    // If numberBuffer is not empty after processing, add it to the output
+    if (numberBuffer.isNotEmpty) {
+      output += numberBuffer + " ";
+    }
+
     while (!stack.isEmpty) {
       output += stack.pop() + " ";
     }
+
     // Now, you can evaluate the RPN expression in 'output' to get the final result.
     userAnswer = evaluateRPN(output).toString();
     debugPrint("userAnswer is $userAnswer");
@@ -203,10 +220,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   double evaluateRPN(String rpnExpression) {
-    final ShuntingYard<double> stack = ShuntingYard<double>();
+    debugPrint("the rpnExpression is $rpnExpression");
+    final CustomStack<double> stack = CustomStack<double>();
+    final List<String> tokens = rpnExpression.split(' ');
 
-    for (var i = 0; i < rpnExpression.length; i++) {
-      String token = rpnExpression[i];
+    for (var i = 0; i < tokens.length; i++) {
+      String token = tokens[i];
       debugPrint("evaluateRPN $token");
       if (!isOperator(token)) {
         stack.push(double.tryParse(token) ?? 0.0);
