@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple[100],
+      backgroundColor: Colors.blue[200],
       body: Column(
         children: <Widget>[
           Expanded(
@@ -108,11 +108,11 @@ class _HomePageState extends State<HomePage> {
                     return MyButton(
                       buttonTapped: () {
                         setState(() {
-                          solveEquation();
+                          reversePolishNotation();
                         });
                       },
                       buttonText: buttons[index],
-                      color: Colors.deepPurple,
+                      color: Colors.blue,
                       textColor: Colors.white,
                     );
                   } else {
@@ -124,11 +124,11 @@ class _HomePageState extends State<HomePage> {
                       },
                       buttonText: buttons[index],
                       color: isOperator(buttons[index])
-                          ? Colors.deepPurple
-                          : Colors.deepPurple[50],
+                          ? Colors.blue
+                          : Colors.blue[50],
                       textColor: isOperator(buttons[index])
                           ? Colors.white
-                          : Colors.deepPurple,
+                          : Colors.blue,
                     );
                   }
                 },
@@ -144,27 +144,80 @@ class _HomePageState extends State<HomePage> {
     return ['+', '-', 'x', '/', '%'].contains(x);
   }
 
+  int precedence(String x) {
+    if (x == '+' || x == '-') {
+      return 1;
+    } else if (x == 'x' || x == '/') {
+      return 2;
+    } else {
+      return 0;
+    }
+  }
+
+  bool hasLeftAssociativity(String x) {
+    if (['+', '-', 'x', '/', '%'].contains(x)) {
+      return true;
+    }
+    return false;
+  }
+
   // Shunting Yard algorthim to solve equations
-  void solveEquation() {
+  void reversePolishNotation() {
     if (userEquation.isEmpty) {
-      return;
+      debugPrint("is empty");
     }
 
-    final List<String> tokens = userEquation.split(RegExp(r'([\+\-\*\/\%])'));
-    for (var element in tokens) {
-      debugPrint(element);
-    }
-    final ShuntingYard<double> operandStack = ShuntingYard<double>();
+    //Stack
+    final ShuntingYard<String> stack = ShuntingYard<String>();
+    String output = "";
 
-    for (final token in tokens) {
-      debugPrint(token);
-      if (isOperator(token)) {
-        String operator = token;
-        final double operand2 = operandStack.pop() ?? 0.0;
-        final double operand1 = operandStack.pop() ?? 0.0;
+    for (var i = 0; i < userEquation.length; i++) {
+      String token = userEquation[i];
+      if (!isOperator(token)) {
+        output += token;
+      } else if (token == '(') {
+        stack.push(token);
+      } else if (token == ')') {
+        while (!stack.isEmpty && stack.peek() != '(') {
+          output += stack.pop() + " ";
+        }
+        stack.pop(); // Pop the '('
+      } else {
+        while (!stack.isEmpty &&
+            precedence(token) <= precedence(stack.peek().toString()) &&
+            hasLeftAssociativity(token)) {
+          output += stack.pop() + " ";
+        }
+        stack.push(token);
+      }
+    }
+    while (!stack.isEmpty) {
+      output += stack.pop() + " ";
+    }
+    // Now, you can evaluate the RPN expression in 'output' to get the final result.
+    userAnswer = evaluateRPN(output).toString();
+    debugPrint("userAnswer is $userAnswer");
+    if (userAnswer == 'NaN') {
+      userAnswer = "Cannot divide by 0";
+    }
+  }
+
+  double evaluateRPN(String rpnExpression) {
+    final ShuntingYard<double> stack = ShuntingYard<double>();
+
+    for (var i = 0; i < rpnExpression.length; i++) {
+      String token = rpnExpression[i];
+      debugPrint("evaluateRPN $token");
+      if (!isOperator(token)) {
+        stack.push(double.tryParse(token) ?? 0.0);
+      } else {
+        final double operand2 = stack.pop();
+        debugPrint("operand2 is $operand2");
+        final double operand1 = stack.pop();
+        debugPrint("operand1 is $operand1");
         double result = 0.0;
 
-        switch (operator) {
+        switch (token) {
           case '+':
             result = operand1 + operand2;
             break;
@@ -175,7 +228,11 @@ class _HomePageState extends State<HomePage> {
             result = operand1 * operand2;
             break;
           case '/':
-            result = operand1 / operand2;
+            if (operand2 != 0) {
+              result = operand1 / operand2;
+            } else {
+              return double.nan; // Handle division by zero error
+            }
             break;
           case '%':
             result = operand1 % operand2;
@@ -183,18 +240,12 @@ class _HomePageState extends State<HomePage> {
           default:
             break;
         }
-
-        operandStack.push(result);
-      } else {
-        operandStack.push(double.tryParse(token) ?? 0.0);
+        debugPrint("What is the result? $result");
+        stack.push(result);
+        debugPrint("What is on the stack? ${stack.peek()}");
       }
     }
-
-    final double finalResult = operandStack.pop() ?? 0.0;
-
-    setState(() {
-      userAnswer = finalResult.toString();
-      debugPrint(userAnswer);
-    });
+    debugPrint("popping the result is ${stack.pop()}");
+    return stack.pop();
   }
 }
