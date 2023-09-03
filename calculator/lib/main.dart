@@ -1,5 +1,6 @@
 import 'package:calculator/buttons.dart';
 import 'package:flutter/material.dart';
+import 'shuntingyard.dart';
 
 void main() => runApp(const MyApp());
 
@@ -103,6 +104,17 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.green,
                       textColor: Colors.white,
                     );
+                  } else if (index == buttons.length - 1) {
+                    return MyButton(
+                      buttonTapped: () {
+                        setState(() {
+                          solveEquation();
+                        });
+                      },
+                      buttonText: buttons[index],
+                      color: Colors.deepPurple,
+                      textColor: Colors.white,
+                    );
                   } else {
                     return MyButton(
                       buttonTapped: () {
@@ -129,9 +141,60 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool isOperator(String x) {
-    if (x == '%' || x == '/' || x == 'x' || x == '+' || x == '-' || x == '=') {
-      return true;
+    return ['+', '-', 'x', '/', '%'].contains(x);
+  }
+
+  // Shunting Yard algorthim to solve equations
+  void solveEquation() {
+    if (userEquation.isEmpty) {
+      return;
     }
-    return false;
+
+    final List<String> tokens = userEquation.split(RegExp(r'([\+\-\*\/\%])'));
+    for (var element in tokens) {
+      debugPrint(element);
+    }
+    final ShuntingYard<double> operandStack = ShuntingYard<double>();
+
+    for (final token in tokens) {
+      debugPrint(token);
+      if (isOperator(token)) {
+        String operator = token;
+        final double operand2 = operandStack.pop() ?? 0.0;
+        final double operand1 = operandStack.pop() ?? 0.0;
+        double result = 0.0;
+
+        switch (operator) {
+          case '+':
+            result = operand1 + operand2;
+            break;
+          case '-':
+            result = operand1 - operand2;
+            break;
+          case 'x':
+            result = operand1 * operand2;
+            break;
+          case '/':
+            result = operand1 / operand2;
+            break;
+          case '%':
+            result = operand1 % operand2;
+            break;
+          default:
+            break;
+        }
+
+        operandStack.push(result);
+      } else {
+        operandStack.push(double.tryParse(token) ?? 0.0);
+      }
+    }
+
+    final double finalResult = operandStack.pop() ?? 0.0;
+
+    setState(() {
+      userAnswer = finalResult.toString();
+      debugPrint(userAnswer);
+    });
   }
 }
