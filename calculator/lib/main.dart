@@ -119,6 +119,8 @@ class _HomePageState extends State<HomePage> {
                     return MyButton(
                       buttonTapped: () {
                         setState(() {
+                          // check if an operator preceeds another, so if - preceeds +
+                          // then we change the plus symbol to a minus and drop the negative number
                           userEquation += buttons[index];
                         });
                         debugPrint(userEquation);
@@ -169,18 +171,25 @@ class _HomePageState extends State<HomePage> {
     final CustomStack<String> stack = CustomStack<String>();
     String output = "";
     String numberBuffer = "";
+    bool lastTokenWasOperator =
+        true; // Initialize as true to handle leading negative numbers
 
     for (var i = 0; i < userEquation.length; i++) {
       String token = userEquation[i];
-      if (!isOperator(token)) {
-        // Accumulate digits and decimal points in numberBuffer
+
+      // Check if the token is a digit, decimal point, or negative sign
+      if (isDigit(token) ||
+          token == '.' ||
+          (token == '-' && lastTokenWasOperator)) {
         numberBuffer += token;
+        lastTokenWasOperator = false;
       } else {
-        // If numberBuffer is not empty, add it to the output
+        // If a number has been collected in numberBuffer, add it to the output
         if (numberBuffer.isNotEmpty) {
           output += numberBuffer + " ";
-          numberBuffer = ""; // Reset the numberBuffer
+          numberBuffer = "";
         }
+        lastTokenWasOperator = true;
 
         if (token == '(') {
           stack.push(token);
@@ -202,7 +211,7 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
-    // If numberBuffer is not empty after processing, add it to the output
+    // If there's any remaining number in the buffer, add it to the output
     if (numberBuffer.isNotEmpty) {
       output += numberBuffer + " ";
     }
@@ -228,7 +237,15 @@ class _HomePageState extends State<HomePage> {
       String token = tokens[i];
       debugPrint("evaluateRPN $token");
       if (!isOperator(token)) {
-        stack.push(double.tryParse(token) ?? 0.0);
+        // Check if the token starts with a minus sign and is not just "-" itself
+        if (token.startsWith('-') && token.length > 1) {
+          double negativeNum = double.parse(token.substring(1));
+          negativeNum = -negativeNum;
+          debugPrint("the negative number is $negativeNum");
+          stack.push(negativeNum ?? 0.0);
+        } else {
+          stack.push(double.tryParse(token) ?? 0.0);
+        }
       } else {
         final double operand2 = stack.pop();
         debugPrint("operand2 is $operand2");
