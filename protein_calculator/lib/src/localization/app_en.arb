@@ -1,0 +1,6 @@
+{
+  "appTitle": "protein_calculator",
+  "@appTitle": {
+    "description": "The title of the application"
+  }
+}
