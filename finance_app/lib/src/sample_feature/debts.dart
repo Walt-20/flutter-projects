@@ -13,6 +13,10 @@ class DebtsView extends StatefulWidget {
 
 class _DebtsViewState extends State<DebtsView> {
   final List<Debt> _debts = [];
+  double totalDebt = 0.0;
+
+  final _nameController = TextEditingController();
+  final _monthlyLoanAmountController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,22 +26,48 @@ class _DebtsViewState extends State<DebtsView> {
       ),
       body: Column(
         children: [
+          TextFormField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              labelText: 'Debt Name',
+            ),
+          ),
+          TextFormField(
+            controller: _monthlyLoanAmountController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Monthly Loan Amount',
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                final name = _nameController.text;
+                final monthlyLoanAmount =
+                    double.tryParse(_monthlyLoanAmountController.text) ?? 0.0;
+                _debts.add(
+                    Debt(name: name, monthlyLoanAmount: monthlyLoanAmount));
+                totalDebt += monthlyLoanAmount;
+                debugPrint("Total Debt: $totalDebt");
+                _nameController.clear();
+                _monthlyLoanAmountController.clear();
+              });
+            },
+            child: const Text('Add Debt'),
+          ),
           Expanded(
             child: ListView.builder(
-              itemCount: _debts.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == _debts.length) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _debts.add(Debt());
-                      });
-                    },
-                    child: const Text('Add Debt'),
-                  );
-                } else {
-                  return _debts[index];
-                }
+              itemCount: _debts.length,
+              itemBuilder: (context, index) {
+                final debt = _debts[index];
+                return ListTile(
+                  title: Text(debt.name),
+                  subtitle: Text(
+                    NumberFormat.simpleCurrency().format(
+                      debt.monthlyLoanAmount,
+                    ),
+                  ),
+                );
               },
             ),
           ),
@@ -47,59 +77,12 @@ class _DebtsViewState extends State<DebtsView> {
   }
 }
 
-class Debt extends StatefulWidget {
-  const Debt({Key? key}) : super(key: key);
+class Debt {
+  final String name;
+  final double monthlyLoanAmount;
 
-  @override
-  _DebtState createState() => _DebtState();
-}
-
-class _DebtState extends State<Debt> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _debtController = TextEditingController();
-  static const _locale = 'en';
-  String _formatNumber(String value) =>
-      NumberFormat.decimalPattern(_locale).format(int.parse(value));
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _debtController.dispose();
-    super.dispose();
-  }
-
-  double get totalDebt {
-    return double.tryParse(_debtController.text.replaceAll(',', '')) ?? 0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Debt Name:'),
-          TextFormField(
-            controller: _nameController,
-          ),
-          const SizedBox(height: 8),
-          const Text('Monthly Debt Amount:'),
-          TextFormField(
-            controller: _debtController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(),
-            onChanged: (value) {
-              value = _formatNumber(value.replaceAll(",", ''));
-              _debtController.value = TextEditingValue(
-                text: value,
-                selection: TextSelection.collapsed(offset: value.length),
-              );
-              setState(() {});
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  Debt({
+    required this.name,
+    required this.monthlyLoanAmount,
+  });
 }
