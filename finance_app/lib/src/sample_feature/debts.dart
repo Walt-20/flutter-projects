@@ -26,17 +26,23 @@ class _DebtsViewState extends State<DebtsView> {
       ),
       body: Column(
         children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Debt Name',
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Debt Name',
+              ),
             ),
           ),
-          TextFormField(
-            controller: _monthlyLoanAmountController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Monthly Loan Amount',
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: _monthlyLoanAmountController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Monthly Loan Amount',
+              ),
             ),
           ),
           ElevatedButton(
