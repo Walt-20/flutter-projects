@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "117563609393",
+    "project_id": "chatbat-a6029",
+    "storage_bucket": "chatbat-a6029.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:117563609393:android:904449dcde9ec39250e010",
+        "android_client_info": {
+          "package_name": "com.example.chatbat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcOF1DGZX2ey7f2ExtxZmtk8OaKY2IjZA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
