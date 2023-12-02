@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'register.dart';
+import 'register.dart';
 // import 'chat_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -45,20 +45,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Color blendColors(Color color1, Color color2) {
-    int redPart = ((color1.red + color2.red)/2).round();
-    int greenPart = ((color1.green + color2.green)/2).round();
-    int bluePart = ((color1.blue + color2.blue)/2).round();
-    return Color.fromARGB(redPart, greenPart, bluePart, 1);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: blendColors(
-          const Color(0xFFFFFFFF),
-          const Color(0xFFA61717).withOpacity(0.65),
-      ),
+      backgroundColor: const Color(0xFF2E86C1).withOpacity(0.65),
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -112,15 +102,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       TextButton(
                           onPressed: () {
-                            /*
-                            handle registering TODO
-
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => RegisterScreen())
                             );
-
-                             */
                           },
                           child: const Text("Register here!")
                       ),
